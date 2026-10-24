@@ -40,6 +40,13 @@ def jukes_cantor(reference_sequence: str, distant_sequence: str) -> float:
     return (correction*length)
 
 
+def check_transition(nuc_1, nuc_2):
+    if (nuc_1 == 'A' and nuc_2 == 'G') or (nuc_1 == 'G' and nuc_2 == 'A'):
+        return True
+    elif (nuc_1 == 'C' and nuc_2 == 'T') or (nuc_1 == 'T' and nuc_2 == 'C'):
+        return True
+
+    return False
 
 def kimura_two_parameter(reference_sequence: str, distant_sequence: str) -> float:
     """The Kimura Two Parameter correction for estimating genetic distances
@@ -62,4 +69,30 @@ def kimura_two_parameter(reference_sequence: str, distant_sequence: str) -> floa
         For example 1.196.
 
     """
-    raise NotImplementedError()
+
+    # K = -1/2 ln[1 - 2P - Q)] - 1/4 ln[1 - 2Q]
+    # P is the fraction of nucleotides that a simple count reveals to be transitions, and
+    # Q is the fraction of nucleotides that a simple count reveals to be transversions
+
+    # Calculting P and Q counts
+    p_count = 0
+    q_count = 0
+    length = 0
+
+    for i in range(len(reference_sequence)):
+            if reference_sequence[i] == '-' or distant_sequence[i] == '-':
+                continue
+            elif reference_sequence[i] != distant_sequence[i]:
+                if check_transition(reference_sequence[i], distant_sequence[i]):
+                    p_count += 1
+                else:
+                    q_count += 1
+    
+            length += 1
+
+    p = p_count/length
+    q = q_count/length
+    
+    correction = -1/2*math.log(1-2*p-q) - 1/4*math.log(1-2*q)
+
+    return (correction*length)
